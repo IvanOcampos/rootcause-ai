@@ -77,9 +77,22 @@ The full-flow gate checks creation, evidence and the approval stop, approved rec
 
 Use the exact scenario and narration in [demo/demo-script.md](demo/demo-script.md). It is designed for a two-minute presentation and includes a truthful fallback if the live event stream fails.
 
-## Team workflow
+For participant 3 frontend work, the UI can run without the backend by keeping mocks enabled:
 
-`main` remains stable; participant work is merged into `develop` through pull requests. Shared API, tool, and event contracts must be reconciled intentionally before integration. See [docs/team-work.md](docs/team-work.md) and [docs/integration-qa.md](docs/integration-qa.md).
+```bash
+NEXT_PUBLIC_USE_MOCKS=true
+```
+
+When the backend implements the official investigation and SSE contracts, switch the frontend to live mode:
+
+```bash
+NEXT_PUBLIC_USE_MOCKS=false
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+## Environment
+
+Copy `.env.example` to `.env`. No secrets are required for the local demo. `NEXT_PUBLIC_USE_MOCKS` controls whether the command center replays the contract-compatible mock scenario or calls the live API. `ROOTCAUSE_DATABASE_URL` will be used when the SQLite data layer is added.
 
 ## Security and demo data
 

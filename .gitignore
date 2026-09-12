@@ -7,5 +7,6 @@ node_modules/
 .npm-cache/
 .next/
 dist/
+*.log
 *.db
 .DS_Store
