@@ -1,0 +1,12 @@
+# RootCause AI ownership map
+#
+# Add confirmed GitHub usernames to the entries below before enabling required
+# code-owner reviews. These comments deliberately do not assign unconfirmed users.
+
+# /agent/              Agent developer
+# /backend/            Backend/Data developer
+# /database/           Backend/Data developer
+# /frontend/           Frontend developer
+# /docs/               Integration/Documentation developer
+# /demo/               Integration/Demo developer
+# /tests/              Integration/QA developer
