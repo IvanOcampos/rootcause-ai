@@ -142,9 +142,7 @@ export default function Home() {
 
     try {
       await client.submitApproval(investigationId, recovery.approval_id, "APPROVED");
-      if (client.config.useMocks) {
-        subscribeToEvents(investigationId, "recovery");
-      }
+      subscribeToEvents(investigationId, "recovery");
     } catch (error) {
       setDecision("idle");
       setErrorMessage(getErrorMessage(error));

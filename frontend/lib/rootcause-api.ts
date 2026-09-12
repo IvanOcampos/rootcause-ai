@@ -132,7 +132,16 @@ function createLiveClient(config: RootCauseApiConfig): RootCauseApiClient {
 
       const handlePayload = (messageEvent: MessageEvent, fallbackType?: string) => {
         try {
-          handlers.onEvent(normalizeAgentEvent(JSON.parse(messageEvent.data), fallbackType));
+          const event = normalizeAgentEvent(JSON.parse(messageEvent.data), fallbackType);
+          handlers.onEvent(event);
+          if (
+            event.type === "approval_required" ||
+            event.type === "incident_resolved" ||
+            event.type === "investigation_failed"
+          ) {
+            handlers.onDone?.();
+            source.close();
+          }
         } catch (error) {
           handlers.onError(toError(error));
         }
