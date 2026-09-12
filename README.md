@@ -41,9 +41,22 @@ npm run dev
 
 Open http://localhost:3000. The backend health check is at http://localhost:8000/health.
 
+For participant 3 frontend work, the UI can run without the backend by keeping mocks enabled:
+
+```bash
+NEXT_PUBLIC_USE_MOCKS=true
+```
+
+When the backend implements the official investigation and SSE contracts, switch the frontend to live mode:
+
+```bash
+NEXT_PUBLIC_USE_MOCKS=false
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
 ## Environment
 
-Copy `.env.example` to `.env`. No secrets are required for the local demo. `ROOTCAUSE_DATABASE_URL` will be used when the SQLite data layer is added.
+Copy `.env.example` to `.env`. No secrets are required for the local demo. `NEXT_PUBLIC_USE_MOCKS` controls whether the command center replays the contract-compatible mock scenario or calls the live API. `ROOTCAUSE_DATABASE_URL` will be used when the SQLite data layer is added.
 
 ## Demo data and full scenario
 
