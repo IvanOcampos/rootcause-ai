@@ -1,6 +1,7 @@
 import type {
   AgentEvent,
   CreateInvestigationResponse,
+  FinalReport,
   Investigation,
   InvestigationStatus,
   Verification,
@@ -23,6 +24,19 @@ export const MOCK_VERIFICATION: Verification = {
   before_value: 62000,
   after_value: 99400,
   verification_message: "Incident successfully resolved",
+};
+
+export const MOCK_FINAL_REPORT: FinalReport = {
+  title: "Incident resolved — verified recovery",
+  executive_summary:
+    "Sales were 38% below baseline because duplicate inventory records stopped the inventory ETL. After approval, 12,453 records were reprocessed and recovery was verified.",
+  analysis: [
+    { label: "Signal", detail: "Sales measured 62,000 against an expected 100,000 baseline." },
+    { label: "Correlation", detail: "inventory_etl logged DUPLICATE_RECORD during the affected window." },
+    { label: "Root cause", detail: "Duplicate inventory records stopped downstream ETL processing." },
+    { label: "Outcome", detail: "Sales, inventory completeness, and ETL health passed verification." },
+  ],
+  recommended_prevention: "Validate duplicates before ingestion and alert on failed ETL runs.",
 };
 
 export function createMockInvestigation(): CreateInvestigationResponse {
@@ -141,6 +155,7 @@ export function getMockRecoveryEvents(investigationId = MOCK_INVESTIGATION_ID): 
       message: "Incident successfully resolved",
       verification_id: "VER-001",
       verification: MOCK_VERIFICATION,
+      report: MOCK_FINAL_REPORT,
     }),
   ];
 }
