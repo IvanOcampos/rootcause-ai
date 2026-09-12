@@ -1,45 +1,81 @@
 # RootCause AI
 
-RootCause AI is an autonomous incident-investigation agent demo. It traces a business anomaly through evidence, proposes recovery, waits for human approval, performs the approved action, and verifies the result before resolving the incident.
+RootCause AI is an incident-investigation agent demo. Given a business anomaly, it gathers operational evidence, identifies the likely root cause, estimates impact, proposes a recovery, waits for a person to approve it, and verifies the outcome before marking the incident resolved.
 
-## Status
-
-Phase 1 bootstrap is complete: the Next.js frontend and FastAPI backend are independently runnable. The database schema, demo data, investigation tools, agent workflow, and command-center UI arrive in the following phases.
+The MVP demonstrates one reproducible scenario: sales fall 38% below normal because duplicate records stop the inventory ETL. The agent connects that evidence to an impact estimate, reprocesses the ETL only after approval, and verifies the recovery.
 
 ## Architecture
 
+```text
+Browser / Command Center
+          │ HTTP + event stream
+          ▼
+FastAPI API ── Agent orchestration ── Contracted tools ── SQLite demo data
 ```
-Browser (Next.js) ──HTTP──> FastAPI ──> Agent / tools / SQLite
+
+The frontend displays state and user decisions. It does not diagnose, query the database, or decide whether an incident is resolved. A resolution is valid only after the verification tool returns `verified: true`.
+
+## Prerequisites
+
+- Node.js 20 or newer
+- Python 3.11 or newer
+- PowerShell 7+ (recommended for the integration gate on Windows)
+
+## Local setup
+
+Copy the environment template. The local demo has no required secrets.
+
+```powershell
+Copy-Item .env.example .env
+npm ci --prefix frontend
+python -m venv backend/.venv
+backend/.venv/Scripts/python -m pip install -r backend/requirements.txt
 ```
 
-The service boundary keeps the simulated SQLite data layer replaceable with production systems later.
-
-## Setup
-
-Requirements: Node.js 20+ and Python 3.11+.
-
-```bash
-cp .env.example .env
-npm install --prefix frontend
-python3 -m venv backend/.venv
-backend/.venv/bin/pip install -r backend/requirements.txt
-```
+On macOS/Linux, activate the virtual environment or use `backend/.venv/bin/python` instead.
 
 ## Run
 
-In one terminal, run the API:
+In one terminal, start the API:
 
-```bash
-backend/.venv/bin/uvicorn app.main:app --app-dir backend --reload --port 8000
+```powershell
+backend/.venv/Scripts/python -m uvicorn app.main:app --app-dir backend --reload --port 8000
 ```
 
-In another terminal, run the frontend:
+In another terminal, start the frontend:
 
-```bash
+```powershell
 npm run dev
 ```
 
-Open http://localhost:3000. The backend health check is at http://localhost:8000/health.
+Open [http://localhost:3000](http://localhost:3000). The health endpoint is [http://localhost:8000/health](http://localhost:8000/health).
+
+## Checks
+
+Run the frontend checks:
+
+```powershell
+npm run lint
+npm run build
+```
+
+Run the backend smoke test while it is running:
+
+```powershell
+.\scripts\verify-demo.ps1
+```
+
+After the agent, backend/data, and frontend feature branches are integrated, verify the complete workflow:
+
+```powershell
+.\scripts\verify-demo.ps1 -RequireFullFlow
+```
+
+The full-flow gate checks creation, evidence and the approval stop, approved recovery, and verified resolution. The test assumes the official API contract in the supplied team agreements; see [docs/integration-qa.md](docs/integration-qa.md) for the compatibility gate.
+
+## Demo
+
+Use the exact scenario and narration in [demo/demo-script.md](demo/demo-script.md). It is designed for a two-minute presentation and includes a truthful fallback if the live event stream fails.
 
 For participant 3 frontend work, the UI can run without the backend by keeping mocks enabled:
 
@@ -58,6 +94,6 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 Copy `.env.example` to `.env`. No secrets are required for the local demo. `NEXT_PUBLIC_USE_MOCKS` controls whether the command center replays the contract-compatible mock scenario or calls the live API. `ROOTCAUSE_DATABASE_URL` will be used when the SQLite data layer is added.
 
-## Demo data and full scenario
+## Security and demo data
 
-These are introduced in phases 2–6. The intended scenario investigates a 38% sales drop caused by an ETL failure from duplicate records, then isolates, reprocesses, and verifies recovery after explicit approval.
+Do not commit `.env`, API keys, credentials, local databases, or personal data. All data used in the demo must be synthetic and reproducible from the repository.

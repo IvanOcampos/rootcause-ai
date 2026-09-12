@@ -4,6 +4,7 @@
 __pycache__/
 *.py[cod]
 node_modules/
+.npm-cache/
 .next/
 dist/
 *.log
