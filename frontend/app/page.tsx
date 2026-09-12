@@ -6,6 +6,7 @@ import {
   getInvestigationStatusFromEvents,
   type AgentEvent,
   type Finding,
+  type FinalReport,
   type Impact,
   type RecoveryPlan,
   type RootCause,
@@ -79,6 +80,13 @@ export default function Home() {
     }
 
     return MOCK_VERIFICATION;
+  }, [events, status]);
+
+  const finalReport = useMemo<FinalReport | undefined>(() => {
+    if (status !== "RESOLVED") return undefined;
+    const resolvedEvent = events.find((agentEvent) => agentEvent.type === "incident_resolved");
+    const report = resolvedEvent?.data.report;
+    return report && typeof report === "object" ? (report as FinalReport) : undefined;
   }, [events, status]);
 
   const canApprove = status === "WAITING_APPROVAL" && decision === "idle" && !isBusy;
@@ -375,6 +383,17 @@ export default function Home() {
 
             <VerificationView verification={verification} />
           </section>
+
+          <section className="report-panel" aria-label="Final incident report">
+            <div className="panel-title-row">
+              <div>
+                <p className="eyebrow">Final Report</p>
+                <h3>{finalReport ? finalReport.title : "Available after verification"}</h3>
+              </div>
+              {finalReport ? <span className="resolved-report-badge">VERIFIED</span> : null}
+            </div>
+            <FinalReportView report={finalReport} />
+          </section>
         </div>
       </section>
     </main>
@@ -481,6 +500,30 @@ function VerificationView({ verification }: { verification?: Verification }) {
           <span>After</span>
           <strong>{formatNumber(verification.after_value)}</strong>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function FinalReportView({ report }: { report?: FinalReport }) {
+  if (!report) {
+    return <p className="muted">The final report is generated only after a verified recovery.</p>;
+  }
+
+  return (
+    <div className="final-report-body">
+      <p className="report-summary">{report.executive_summary}</p>
+      <div className="report-analysis">
+        {report.analysis.map((item) => (
+          <article key={item.label}>
+            <strong>{item.label}</strong>
+            <p>{item.detail}</p>
+          </article>
+        ))}
+      </div>
+      <div className="prevention-note">
+        <strong>Recommended prevention</strong>
+        <p>{report.recommended_prevention}</p>
       </div>
     </div>
   );

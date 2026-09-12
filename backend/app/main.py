@@ -132,11 +132,22 @@ def submit_approval(investigation_id: str, approval_id: str, payload: ApprovalRe
     action = tool_data(demo_tools.execute_recovery(record["incident_id"], approval_id))
     result = tool_data(demo_tools.verify_result(record["incident_id"], action["action_id"]))
     verification = {"verification_id": "VER-001", "status": "PASSED", **result}
+    report = {
+        "title": "Incident resolved — verified recovery",
+        "executive_summary": "Sales were 38% below baseline because duplicate inventory records stopped the inventory ETL. After human approval, RootCause AI reprocessed 12,453 affected records and verified recovery from 62,000 to 99,400 sales.",
+        "analysis": [
+            {"label": "Signal", "detail": "Sales measured 62,000 against a historical expectation of 100,000, a -38% anomaly."},
+            {"label": "Correlation", "detail": "The inventory_etl log recorded DUPLICATE_RECORD at 08:31, matching the incomplete reporting window."},
+            {"label": "Root cause", "detail": "Duplicate inventory records stopped ETL processing and left downstream sales data incomplete."},
+            {"label": "Outcome", "detail": "Approved reprocessing completed successfully; sales, inventory completeness, and ETL health all passed verification."},
+        ],
+        "recommended_prevention": "Add duplicate-record validation before ETL ingestion and alert on failed inventory_etl runs.",
+    }
     record["verification"], record["status"] = verification, "RESOLVED"
     record["recovery_events"] = [
         event(investigation_id, "action_started", {"action_id": action["action_id"], "action": action["action"], "label": "Reprocessing inventory ETL"}),
         event(investigation_id, "action_completed", {"action_id": action["action_id"], "status": "SUCCESS", "records_processed": action["records_processed"]}),
         event(investigation_id, "verification_started", {"action_id": action["action_id"], "label": "Verifying recovery"}),
-        event(investigation_id, "incident_resolved", {"message": "Incident successfully resolved", "verification_id": "VER-001", "verification": verification}),
+        event(investigation_id, "incident_resolved", {"message": "Incident successfully resolved", "verification_id": "VER-001", "verification": verification, "report": report}),
     ]
     return {"approval_id": approval_id, "status": "APPROVED"}

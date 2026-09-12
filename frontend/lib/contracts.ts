@@ -84,6 +84,16 @@ export type Verification = {
   verification_message?: string;
 };
 
+export type FinalReport = {
+  title: string;
+  executive_summary: string;
+  analysis: Array<{
+    label: string;
+    detail: string;
+  }>;
+  recommended_prevention: string;
+};
+
 export type Investigation = {
   investigation_id: string;
   incident_id: string;
